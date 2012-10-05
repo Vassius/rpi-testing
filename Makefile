@@ -26,7 +26,7 @@ $(BUILDDIR)/start.o: $(SRCDIR)/start.s
 	$(TARGET)-as -o $@ $^
 
 $(BUILDDIR)/kmain.o: $(SRCDIR)/kmain.c
-	$(TARGET)-gcc -c -o $@ $^
+	$(TARGET)-gcc -c -o $@ $^ -Wall -Werror
 
 .PHONY: clean
 

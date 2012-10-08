@@ -1,31 +1,35 @@
 #define GPIO_CTRL_ADDR 0x20200000
-#define PIN16_ENBL 1<<18
-#define PIN16_OFF 1<<16
+#define PIN_ENBL_OUTPUT 1<<18
+#define PIN_ENBL_INPUT 0
 
 #define TIMER_COUNTER 0x20003004
 
-volatile unsigned int *gpio_ctrl = (volatile unsigned int*)(GPIO_CTRL_ADDR + 4);
+volatile unsigned int *gpfsel1 = (volatile unsigned int*)(GPIO_CTRL_ADDR + 0x4);
+volatile unsigned int *gpset0 = (volatile unsigned int*)(GPIO_CTRL_ADDR + 0x1C);
+volatile unsigned int *gpclr0 = (volatile unsigned int*)(GPIO_CTRL_ADDR + 0x28);
+volatile unsigned int *gplev0 = (volatile unsigned int*)(GPIO_CTRL_ADDR + 0x34);
 
-void toggle_led(int on) {
+void toggle_led() {
+    unsigned int on;
+    on = *gplev0 & 1<<16;
     if (on) {
-        gpio_ctrl = (volatile unsigned int*)(GPIO_CTRL_ADDR + 28);
+        *gpclr0 = 1<<16;
     }
     else {
-        gpio_ctrl = (volatile unsigned int*)(GPIO_CTRL_ADDR + 40);
+        *gpset0 = 1<<16;
     }
-    *gpio_ctrl ^= PIN16_OFF;    
 }
 
 int kmain(void) {
     volatile unsigned int *counter = (volatile unsigned int*)(TIMER_COUNTER);
     volatile unsigned int value = *counter;
-    int status = 0;
-    *gpio_ctrl = PIN16_ENBL;
+    //int status = 0;
+    *gpfsel1 = PIN_ENBL_OUTPUT;
     while (1) {
         if (*counter - value >= 1000000) {
             value = *counter;
-            toggle_led(status);
-            status ^= 1;
+            toggle_led();
+            //status ^= 1;
         }
     }
 
